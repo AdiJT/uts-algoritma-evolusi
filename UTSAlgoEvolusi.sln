@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UTSAlgoEvolusi.Core", "UTSAlgoEvolusi.Core\UTSAlgoEvolusi.Core.csproj", "{5C46AC24-90BD-4176-998E-F9AAEA5E2CE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UTSAlgoEvolusi.Test", "UTSAlgoEvolusi.Test\UTSAlgoEvolusi.Test.csproj", "{6E140BAF-5527-4CA4-8C72-49F8FAFC37C0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C46AC24-90BD-4176-998E-F9AAEA5E2CE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C46AC24-90BD-4176-998E-F9AAEA5E2CE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C46AC24-90BD-4176-998E-F9AAEA5E2CE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C46AC24-90BD-4176-998E-F9AAEA5E2CE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E140BAF-5527-4CA4-8C72-49F8FAFC37C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E140BAF-5527-4CA4-8C72-49F8FAFC37C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E140BAF-5527-4CA4-8C72-49F8FAFC37C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E140BAF-5527-4CA4-8C72-49F8FAFC37C0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A3D7C289-A44D-4232-853A-74A8F8092AE6}
+	EndGlobalSection
+EndGlobal
