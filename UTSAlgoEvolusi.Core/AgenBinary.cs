@@ -124,7 +124,8 @@ public class AgenBinary
             }
             else
             {
-                if (globalBestFitness < localBestFitness)
+                Func<double, double, bool> compare = JenisAgen == JenisAgen.Max ? (double gb, double lb) => gb < lb : (double gb, double lb) => gb > lb;
+                if (compare(globalBestFitness, localBestFitness))
                 {
                     globalBest = localBest;
                     globalBestFitness = localBestFitness;
