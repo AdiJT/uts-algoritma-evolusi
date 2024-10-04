@@ -151,6 +151,7 @@ public class AgenBinary
 
     private List<Kromoson> KawinSilang(List<Kromoson> populasi)
     {
+        var newPopulasi = populasi.Select(k => new Kromoson(k)).ToList();
         var random = new Random();
 
         var daftarProbabilitasCrossover = Enumerable.Range(1, JumlahPopulasi).Select(x => random.NextDouble());
@@ -158,7 +159,7 @@ public class AgenBinary
             daftarProbabilitasCrossover = Enumerable.Range(1, JumlahPopulasi).Select(x => random.NextDouble());
 
         var indexKawinSilang = daftarProbabilitasCrossover.Select((x, index) => x <= ProbabilitasCrossover ? index : 0).TakeWhile(x => x != 0).ToArray();
-        var kandidatKawinSilang = indexKawinSilang.ToDictionary(i => i, i => populasi[i]);
+        var kandidatKawinSilang = indexKawinSilang.ToDictionary(i => i, i => newPopulasi[i]);
 
         random.Shuffle(indexKawinSilang);
 
@@ -167,18 +168,18 @@ public class AgenBinary
             if (i != indexKawinSilang.Length - 1)
             {
                 var hasilKawin = Crossover.Crossover(this, kandidatKawinSilang[indexKawinSilang[i]], kandidatKawinSilang[indexKawinSilang[i + 1]]);
-                populasi[indexKawinSilang[i]] = hasilKawin.anak1;
-                populasi[indexKawinSilang[i + 1]] = hasilKawin.anak2;
+                newPopulasi[indexKawinSilang[i]] = hasilKawin.anak1;
+                newPopulasi[indexKawinSilang[i + 1]] = hasilKawin.anak2;
             }
             else
             {
                 var parent2Index = random.GetItem(indexKawinSilang.Take(indexKawinSilang.Length - 1));
                 var hasilKawin = Crossover.Crossover(this, kandidatKawinSilang[indexKawinSilang[i]], kandidatKawinSilang[indexKawinSilang[parent2Index]]);
-                populasi[indexKawinSilang[i]] = hasilKawin.anak1;
+                newPopulasi[indexKawinSilang[i]] = hasilKawin.anak1;
             }
         }
 
-        return populasi;
+        return newPopulasi;
     }
 
     public List<double> HitungFitnessPopulasi(List<Kromoson> populasi) => populasi.Select(k => 
@@ -225,18 +226,22 @@ public class AgenBinary
 
     public List<Kromoson> Mutasi(List<Kromoson> populasi)
     {
+        var newPopulasi = new List<Kromoson>();
         var random = new Random();
 
-        for(var i = 0; i < populasi.Count; i++)
+        foreach (var kromoson in populasi)
         {
-            for(var j = 0; j < populasi[i].JumlahGen; j++)
+            var newKromoson = new Kromoson(kromoson);
+            for (var i = 0; i < newKromoson.JumlahGen; i++)
             {
                 var p = random.NextDouble();
                 if (p <= ProbabilitasMutasi)
-                    populasi[i].Gen[j] = populasi[i][j] == 0 ? 1 : 0;
+                    newKromoson[i] = newKromoson[i] == 1 ? 0 : 1;
             }
+
+            newPopulasi.Add(newKromoson);
         }
 
-        return populasi;
+        return newPopulasi;
     }
 }
