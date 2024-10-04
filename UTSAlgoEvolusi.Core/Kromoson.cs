@@ -5,7 +5,7 @@ using UTSAlgoEvolusi.Core.Utils;
 
 namespace UTSAlgoEvolusi.Core
 {
-    public struct Kromoson
+    public class Kromoson
     {
         public List<int> Gen { get; }
 
@@ -34,6 +34,16 @@ namespace UTSAlgoEvolusi.Core
             JumlahGenY = (int)Math.Log2((_batasY.atas - _batasY.bawah) * Math.Pow(10, _presisi)) + 1;
 
             Gen = new List<int>(Enumerable.Repeat(0, JumlahGen));
+        }
+
+        public Kromoson(Kromoson kromoson)
+        {
+            Gen = kromoson.Gen.Select(x => x).ToList();
+            _batasX = kromoson._batasX;
+            _batasY = kromoson._batasY;
+            _presisi = kromoson._presisi;
+            JumlahGenX = kromoson.JumlahGenX;
+            JumlahGenY = kromoson.JumlahGenY;
         }
 
         public (double x, double y) Decoding()

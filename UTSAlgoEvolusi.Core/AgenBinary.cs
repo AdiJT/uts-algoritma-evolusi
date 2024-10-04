@@ -144,7 +144,7 @@ public class AgenBinary
             counterGenerasi++;
         }
 
-        var hasil = new AgenBinaryResult(globalBest!.Value, localBests, HitungKonvergensiPopulasi(populasi), counterGenerasi);
+        var hasil = new AgenBinaryResult(globalBest!, localBests, HitungKonvergensiPopulasi(populasi), counterGenerasi);
 
         return hasil;
     }
