@@ -114,7 +114,7 @@ public class AgenBinary
 
             var localBestFitness = JenisAgen == JenisAgen.Max ? fitnessPopulasi.Max() : fitnessPopulasi.Min();
             var localBestIndex = fitnessPopulasi.IndexOf(localBestFitness);
-            var localBest = populasi[localBestIndex];
+            var localBest = new Kromoson(populasi[localBestIndex]);
 
             localBests.Add(localBest);
             if (globalBest is null)

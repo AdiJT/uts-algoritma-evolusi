@@ -30,9 +30,14 @@ public class RouletteWheel : ISeleksi
         for(int i = 0; i < populasi.Count; i++)
         {
             var p = random.NextDouble();
-            var k = probabilitasKumulatif.FindIndex(pk => pk < p);
+            var k = -1;
 
-            if (k == -1) throw new Exception("Gagal disini");
+            for (var j = probabilitasKumulatif.Count - 1; j >= 0; j--)
+                if (probabilitasKumulatif[j] <  p)
+                {
+                    k = j;
+                    break;
+                }
 
             populasiBaru.Add(populasi[k + 1]);
         }
