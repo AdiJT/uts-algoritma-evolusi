@@ -1,7 +1,6 @@
-﻿namespace UTSAlgoEvolusi.Core.Abstractions
+﻿namespace UTSAlgoEvolusi.Core.Abstractions;
+
+public interface ICrossover
 {
-    public interface ICrossover
-    {
-        (Kromoson anak1, Kromoson anak2) Crossover(Kromoson parent1, Kromoson parent2, double probabilitasCrossover);
-    }
+    (Kromoson anak1, Kromoson anak2) Crossover(AgenBinary agen, Kromoson parent1, Kromoson parent2);
 }

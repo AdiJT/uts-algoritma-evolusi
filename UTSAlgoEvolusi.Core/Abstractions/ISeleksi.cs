@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace UTSAlgoEvolusi.Core.Abstractions
+namespace UTSAlgoEvolusi.Core.Abstractions;
+
+public interface ISeleksi
 {
-    public interface ISeleksi
-    {
-        List<Kromoson> Seleksi(List<Kromoson> populasi);
-    }
+    List<Kromoson> Seleksi(AgenBinary agen, List<Kromoson> populasi);
 }

@@ -14,8 +14,7 @@ namespace UTSAlgoEvolusi.Core.Utils
             if (angka == 0)
                 return new List<int>(Enumerable.Range(0, maksJumlahDigit).Select(x => 0));
 
-            var jumlahDigit = (int)Math.Log(angka, 2);
-
+            var jumlahDigit = (int)Math.Log(angka, 2) + 1;
 
             if (jumlahDigit > maksJumlahDigit)
                 throw new ArgumentOutOfRangeException(
@@ -31,9 +30,7 @@ namespace UTSAlgoEvolusi.Core.Utils
                 angka = angka >> 1;
             }
 
-            biner.Add(angka);
-
-            return biner.PadLeft(maksJumlahDigit, 0).ToList();
+            return biner.Reverse<int>().PadLeft(maksJumlahDigit, 0).ToList();
         }
 
         public static int ToInt(List<int> biner)
