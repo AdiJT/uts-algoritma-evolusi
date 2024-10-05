@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using UTSAlgoEvolusi.Core.Utils;
 
-namespace UTSAlgoEvolusi.Test.Core
+namespace UTSAlgoEvolusi.Test.Core.Utils
 {
     public class BinaryConverterTests
     {
@@ -37,7 +37,7 @@ namespace UTSAlgoEvolusi.Test.Core
 
         [Theory]
         [MemberData(nameof(ToBinaryTestData))]
-        public void ToBinary_Should_ReturnCorrectBinary(int number, int maksDigit ,List<int> expected)
+        public void ToBinary_Should_ReturnCorrectBinary(int number, int maksDigit, List<int> expected)
         {
             //Act
             var result = BinaryConverter.ToBinary(number, maksDigit);

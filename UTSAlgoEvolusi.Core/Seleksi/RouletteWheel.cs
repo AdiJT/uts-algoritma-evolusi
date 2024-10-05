@@ -9,9 +9,8 @@ public class RouletteWheel : ISeleksi
 {
     public List<Kromoson> Seleksi(AgenBinary agen, List<Kromoson> populasi)
     {
-        var evalFunc = agen.JenisAgen == JenisAgen.Max ? agen.FungsiObjektif : (x, y) => 1 / agen.FungsiObjektif(x, y);
-
-        var evaluasi = agen.HitungFitnessPopulasi(populasi);
+        var evalFunc = agen.JenisAgen == JenisAgen.Max ? agen.FungsiObjektif : arg => 1 / agen.FungsiObjektif(arg);
+        var evaluasi = populasi.Select(k => evalFunc(agen.Decoder.Decode(k.Gen)));
 
         var total = evaluasi.Sum();
         var probabilitasKumulatif = new List<double>();

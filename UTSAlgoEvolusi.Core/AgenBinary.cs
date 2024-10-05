@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UTSAlgoEvolusi.Core.Abstractions;
@@ -34,9 +33,8 @@ public class AgenBinaryResult
 
 public class AgenBinary
 {
-    private (double bawah, double atas) _batasXFungsiObjektif;
-    private (double bawah, double atas) _batasYFungsiObjektif;
-    private int _presisi = 4;
+    private (double bawah, double atas) _batasX;
+    private (double bawah, double atas) _batasY;
 
     public JenisAgen JenisAgen { get; set; } = JenisAgen.Min;
     public int JumlahGenerasi { get; set; } = 1000;
@@ -44,58 +42,53 @@ public class AgenBinary
     public double ProbabilitasCrossover { get; set; } = 0.50;
     public double ProbabilitasMutasi { get; set; } = 0.1;
     public double BatasKonvergensiPopulasi { get; set; } = 0.8;
-    public Func<double, double, double> FungsiObjektif { get; set; }
+    public Func<LinearDuaPeubah, double> FungsiObjektif { get; set; }
 
-    public (double bawah, double atas) BatasXFungsiObjektif 
-    { 
-        get => _batasXFungsiObjektif; 
+    public ISeleksi Seleksi { get; set; }
+    public ICrossover Crossover { get; set; }
+    public IEncoder<int, LinearDuaPeubah> Encoder { get; set; }
+    public IDecoder<int, LinearDuaPeubah> Decoder { get; set; }
+
+    public (double bawah, double atas) BatasX
+    {
+        get => _batasX;
         set
         {
             if (value.bawah > value.atas)
-                throw new ArgumentException("Batas X Bawah melebihi Batas X Atas");
+                throw new ArgumentException("BatasX.bawah lebih dari BatasX.atas");
 
-            _batasXFungsiObjektif = value; 
-        } 
-    }
-
-    public (double bawah, double atas) BatasYFungsiObjektif 
-    { 
-        get => _batasYFungsiObjektif; 
-        set 
-        {
-            if (value.bawah > value.atas)
-                throw new ArgumentException("Batas Y Bawah melebihi Batas Y Atas");
-
-            _batasYFungsiObjektif = value;
+            _batasX = value;
         }
     }
 
-    public int Presisi 
-    { 
-        get => _presisi; 
-        set 
+    public (double bawah, double atas) BatasY
+    {
+        get => _batasY;
+        set
         {
-            if (value <= 0)
-                throw new ArgumentException("Presisi tidak boleh 0 atau negatif");
+            if (value.bawah > value.atas)
+                throw new ArgumentException("BatasY.bawah lebih dari BatasY.atas");
 
-            _presisi = value;
-        } 
+            _batasY = value;
+        }
     }
-    public ISeleksi Seleksi { get; set; }
-    public ICrossover Crossover { get; set; }
 
     public AgenBinary(
-        Func<double, double, double> fungsiObjektif, 
-        (double bawah, double atas) batasXFungsiObjektif, 
-        (double bawah, double atas) batasYFungsiObjektif, 
-        ISeleksi seleksi, 
-        ICrossover crossover)
+        Func<LinearDuaPeubah, double> fungsiObjektif,
+        (double bawah, double atas) batasX,
+        (double bawah, double atas) batasY,
+        ISeleksi seleksi,
+        ICrossover crossover,
+        IEncoder<int, LinearDuaPeubah> encoder,
+        IDecoder<int, LinearDuaPeubah> decoder)
     {
         FungsiObjektif = fungsiObjektif;
-        BatasXFungsiObjektif = batasXFungsiObjektif;
-        BatasYFungsiObjektif = batasYFungsiObjektif;
+        BatasX = batasX;
+        BatasY = batasY;
         Seleksi = seleksi;
         Crossover = crossover;
+        Encoder = encoder;
+        Decoder = decoder;
     }
 
     public AgenBinaryResult Execute()
@@ -182,22 +175,18 @@ public class AgenBinary
         return newPopulasi;
     }
 
-    public List<double> HitungFitnessPopulasi(List<Kromoson> populasi) => populasi.Select(k => 
-    {
-        var decode = k.Decoding();
-        return FungsiObjektif(decode.x, decode.y);
-    }).ToList();
+    public List<double> HitungFitnessPopulasi(List<Kromoson> populasi) => populasi.Select(k => FungsiObjektif(Decoder.Decode(k.Gen)) ).ToList();
 
     public List<Kromoson> GeneratePopulasiAwal()
     {
         var populasiAwal = new List<Kromoson>();
         var random = new Random();
 
-        for(var i = 0; i < JumlahPopulasi; i++)
+        for (var i = 0; i < JumlahPopulasi; i++)
         {
-            var randX = random.NextDouble(BatasXFungsiObjektif.bawah, BatasXFungsiObjektif.atas);
-            var randY = random.NextDouble(BatasYFungsiObjektif.bawah, BatasYFungsiObjektif.atas);
-            populasiAwal.Add(Kromoson.Encoding(BatasXFungsiObjektif, BatasYFungsiObjektif, Presisi, randX, randY));
+            var randX = random.NextDouble(BatasX.bawah, BatasX.atas);
+            var randY = random.NextDouble(BatasY.bawah, BatasY.atas);
+            populasiAwal.Add(new Kromoson(Encoder.Encode(new LinearDuaPeubah { X = randX, Y = randY })));
         }
 
         return populasiAwal;
@@ -232,7 +221,7 @@ public class AgenBinary
         foreach (var kromoson in populasi)
         {
             var newKromoson = new Kromoson(kromoson);
-            for (var i = 0; i < newKromoson.JumlahGen; i++)
+            for (var i = 0; i < newKromoson.PanjangGen; i++)
             {
                 var p = random.NextDouble();
                 if (p <= ProbabilitasMutasi)

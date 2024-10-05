@@ -7,11 +7,15 @@ public class SinglePointCrossover : ICrossover
 {
     public (Kromoson anak1, Kromoson anak2) Crossover(AgenBinary agen, Kromoson parent1, Kromoson parent2)
     {
-        var random = new Random();
-        var titikPotong = random.Next(0, parent1.JumlahGen);
+        if (parent1.PanjangGen != parent2.PanjangGen)
+            throw new ArgumentException("PanjangGen parent1 dan parent2 tidak sama");
 
-        var anak1 = new Kromoson(agen.BatasXFungsiObjektif, agen.BatasYFungsiObjektif, agen.Presisi);
-        var anak2 = new Kromoson(agen.BatasXFungsiObjektif, agen.BatasYFungsiObjektif, agen.Presisi);
+        var random = new Random();
+        var panjangGen = parent1.PanjangGen;
+        var titikPotong = random.Next(0, panjangGen);
+
+        var anak1 = new Kromoson(parent1.PanjangGen);
+        var anak2 = new Kromoson(parent2.PanjangGen);
 
         for(var i = 0; i < titikPotong; i++)
         {
@@ -19,7 +23,7 @@ public class SinglePointCrossover : ICrossover
             anak2[i] = parent2[i];
         }
 
-        for (var i = titikPotong; i < parent1.JumlahGen; i++)
+        for (var i = titikPotong; i < panjangGen; i++)
         {
             anak1[i] = parent2[i];
             anak2[i] = parent1[i];
