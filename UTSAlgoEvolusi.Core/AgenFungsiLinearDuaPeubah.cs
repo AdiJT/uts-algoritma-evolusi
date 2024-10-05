@@ -93,14 +93,18 @@ public class AgenFungsiLinearDuaPeubah
 
     public AgenBinaryResult Execute()
     {
+        return Execute(GeneratePopulasiAwal());
+    }
+
+    public AgenBinaryResult Execute(List<Kromoson> populasi)
+    {
         var counterGenerasi = -1;
-        var populasi = GeneratePopulasiAwal();
         var localBests = new List<Kromoson>();
         Kromoson? globalBest = null;
         double globalBestFitness = JenisAgen == JenisAgen.Max ? double.MinValue : double.MaxValue;
         var random = new Random();
 
-        while(counterGenerasi < JumlahGenerasi && !IsPopulasiKonvergen(populasi))
+        while (counterGenerasi < JumlahGenerasi && !IsPopulasiKonvergen(populasi))
         {
             //Perhitungan Fitness dan Penentuan Local dan Global Best
             var fitnessPopulasi = HitungFitnessPopulasi(populasi);
