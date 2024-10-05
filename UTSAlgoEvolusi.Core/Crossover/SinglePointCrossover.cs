@@ -5,7 +5,7 @@ namespace UTSAlgoEvolusi.Core.Crossover;
 
 public class SinglePointCrossover : ICrossover
 {
-    public (Kromoson anak1, Kromoson anak2) Crossover(AgenBinary agen, Kromoson parent1, Kromoson parent2)
+    public (Kromoson anak1, Kromoson anak2) Crossover(AgenFungsiLinearDuaPeubah agen, Kromoson parent1, Kromoson parent2)
     {
         if (parent1.PanjangGen != parent2.PanjangGen)
             throw new ArgumentException("PanjangGen parent1 dan parent2 tidak sama");

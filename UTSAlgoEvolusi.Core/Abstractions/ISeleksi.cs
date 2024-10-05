@@ -4,5 +4,5 @@ namespace UTSAlgoEvolusi.Core.Abstractions;
 
 public interface ISeleksi
 {
-    List<Kromoson> Seleksi(AgenBinary agen, List<Kromoson> populasi);
+    List<Kromoson> Seleksi(AgenFungsiLinearDuaPeubah agen, List<Kromoson> populasi);
 }

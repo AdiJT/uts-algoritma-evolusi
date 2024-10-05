@@ -31,7 +31,7 @@ public class AgenBinaryResult
     }
 }
 
-public class AgenBinary
+public class AgenFungsiLinearDuaPeubah
 {
     private (double bawah, double atas) _batasX;
     private (double bawah, double atas) _batasY;
@@ -73,7 +73,7 @@ public class AgenBinary
         }
     }
 
-    public AgenBinary(
+    public AgenFungsiLinearDuaPeubah(
         Func<LinearDuaPeubah, double> fungsiObjektif,
         (double bawah, double atas) batasX,
         (double bawah, double atas) batasY,

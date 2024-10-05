@@ -7,7 +7,7 @@ namespace UTSAlgoEvolusi.Core.Seleksi;
 
 public class RouletteWheel : ISeleksi
 {
-    public List<Kromoson> Seleksi(AgenBinary agen, List<Kromoson> populasi)
+    public List<Kromoson> Seleksi(AgenFungsiLinearDuaPeubah agen, List<Kromoson> populasi)
     {
         var evalFunc = agen.JenisAgen == JenisAgen.Max ? agen.FungsiObjektif : arg => 1 / agen.FungsiObjektif(arg);
         var evaluasi = populasi.Select(k => evalFunc(agen.Decoder.Decode(k.Gen)));
