@@ -2,6 +2,7 @@
 using UTSAlgoEvolusi.Core.Abstractions;
 using UTSAlgoEvolusi.Core.Utils;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace UTSAlgoEvolusi.Core.Encoding;
 
@@ -86,5 +87,29 @@ public class FungsiLinearDuaPeubahEncoding : IEncoding<int, LinearDuaPeubah>
         var y = BatasY.bawah + yDecimal * ((BatasY.atas - BatasY.bawah) / (Math.Pow(2, PanjangGenY) - 1));
 
         return new LinearDuaPeubah { X = x, Y = y };
+    }
+
+    public List<Kromoson<int>> GeneratePopulasi(int jumlahPopulasi)
+    {
+        var populasi = new List<Kromoson<int>>();
+        var random = new Random();
+
+        for (int i = 0; i < jumlahPopulasi; i++)
+        {
+            var randX = random.NextDouble(BatasX.bawah, BatasX.atas);
+            var randY = random.NextDouble(BatasY.bawah, BatasY.atas);
+
+            populasi.Add(Encode(new LinearDuaPeubah { X=randX, Y=randY }));
+        }
+
+        return populasi;
+    }
+
+    public Kromoson<int> Mutasi(Kromoson<int> kromoson, int posisiAlel)
+    {
+        var newKromoson = new Kromoson<int>(kromoson);
+        newKromoson.DaftarAlel[posisiAlel] = kromoson.DaftarAlel[posisiAlel] == 1 ? 0 : 1;
+
+        return newKromoson;
     }
 }

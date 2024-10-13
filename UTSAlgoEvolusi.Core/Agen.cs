@@ -11,18 +11,18 @@ public enum JenisAgen
     Max, Min
 }
 
-public class AgenResult
+public class AgenResult<TAlel>
 {
-    public Kromoson<int> GlobalBest { get; }
-    public List<List<Kromoson<int>>> PopulasiPerGenerasi { get; }
-    public List<Kromoson<int>> LocalBests { get; }
+    public Kromoson<TAlel> GlobalBest { get; }
+    public List<List<Kromoson<TAlel>>> PopulasiPerGenerasi { get; }
+    public List<Kromoson<TAlel>> LocalBests { get; }
     public double KonvergensiPopulasi { get; }
     public int CounterGenerasi { get; }
 
     public AgenResult(
-        Kromoson<int> globalBest,
-        List<Kromoson<int>> localBest,
-        List<List<Kromoson<int>>> populasiPerGenerasi,
+        Kromoson<TAlel> globalBest,
+        List<Kromoson<TAlel>> localBest,
+        List<List<Kromoson<TAlel>>> populasiPerGenerasi,
         double konvergensiPopulasi,
         int counterGenerasi)
     {
@@ -34,7 +34,7 @@ public class AgenResult
     }
 }
 
-public class Agen
+public class Agen<TAlel, TAsli>
 {
     public JenisAgen JenisAgen { get; set; } = JenisAgen.Min;
     public int JumlahGenerasi { get; set; } = 1000;
@@ -43,19 +43,17 @@ public class Agen
     public double ProbabilitasMutasi { get; set; } = 0.1;
     public double BatasKonvergensiPopulasi { get; set; } = 0.8;
 
-    public Func<LinearDuaPeubah, double> FungsiObjektif { get; set; }
+    public Func<TAsli, double> FungsiObjektif { get; set; }
 
-    public ISeleksi<int, LinearDuaPeubah> Seleksi { get; set; }
-    public ICrossover<int> Crossover { get; set; }
-    public IEncoding<int, LinearDuaPeubah> Encoding { get; set;}
+    public ISeleksi<TAlel, TAsli> Seleksi { get; set; }
+    public ICrossover<TAlel> Crossover { get; set; }
+    public IEncoding<TAlel, TAsli> Encoding { get; set;}
 
     public Agen(
-        Func<LinearDuaPeubah, double> fungsiObjektif,
-        ISeleksi<int, LinearDuaPeubah> seleksi,
-        IEncoding<int, LinearDuaPeubah> encoding,
-        ICrossover<int> crossover,
-        (double bawah, double atas) batasX,
-        (double bawah, double atas) batasY)
+        Func<TAsli, double> fungsiObjektif,
+        ISeleksi<TAlel, TAsli> seleksi,
+        IEncoding<TAlel, TAsli> encoding,
+        ICrossover<TAlel> crossover)
     {
         FungsiObjektif = fungsiObjektif;
         Seleksi = seleksi;
@@ -63,16 +61,19 @@ public class Agen
         Encoding = encoding;
     }
 
-    public AgenResult Execute(List<Kromoson<int>> populasiAwal)
+    public AgenResult<TAlel> Execute(List<Kromoson<TAlel>> populasiAwal)
     {
-        var populasi = populasiAwal.Select(k => new Kromoson<int>(k)).ToList();
+        if (populasiAwal.Count != JumlahPopulasi)
+            throw new ArgumentException("jumlah populasiAwal tidak sama dengan JumlahPopulasi");
 
-        var counterGenerasi = -1;
+        var populasi = populasiAwal.Select(k => new Kromoson<TAlel>(k)).ToList();
 
-        var localBests = new List<Kromoson<int>>();
-        Kromoson<int>? globalBest = null;
-        var populasiPerGenerasi = new List<List<Kromoson<int>>>();
+        var counterGenerasi = 0;
+        var populasiPerGenerasi = new List<List<Kromoson<TAlel>>>();
+        var localBests = new List<Kromoson<TAlel>>();
+        Kromoson<TAlel>? globalBest = null;
         double globalBestFitness = JenisAgen == JenisAgen.Max ? double.MinValue : double.MaxValue;
+
         var random = new Random();
 
         while (counterGenerasi < JumlahGenerasi && !IsPopulasiKonvergen(populasi))
@@ -82,7 +83,7 @@ public class Agen
 
             var localBestFitness = JenisAgen == JenisAgen.Max ? fitnessPopulasi.Max() : fitnessPopulasi.Min();
             var localBestIndex = fitnessPopulasi.IndexOf(localBestFitness);
-            var localBest = new Kromoson<int>(populasi[localBestIndex]);
+            var localBest = new Kromoson<TAlel>(populasi[localBestIndex]);
 
             localBests.Add(localBest);
             if (globalBest is null)
@@ -109,19 +110,19 @@ public class Agen
             //Mutasi
             populasi = Mutasi(populasi);
 
-            populasiPerGenerasi.Add(populasi.Select(k => new Kromoson<int>(k)).ToList());
+            populasiPerGenerasi.Add(populasi.Select(k => new Kromoson<TAlel>(k)).ToList());
 
             counterGenerasi++;
         }
 
-        var hasil = new AgenResult(globalBest!, localBests, populasiPerGenerasi, HitungKonvergensiPopulasi(populasi), counterGenerasi);
+        var hasil = new AgenResult<TAlel>(globalBest!, localBests, populasiPerGenerasi, HitungKonvergensiPopulasi(populasi), counterGenerasi);
 
         return hasil;
     }
 
-    private List<Kromoson<int>> KawinSilang(List<Kromoson<int>> populasi)
+    private List<Kromoson<TAlel>> KawinSilang(List<Kromoson<TAlel>> populasi)
     {
-        var newPopulasi = populasi.Select(k => new Kromoson<int>(k)).ToList();
+        var newPopulasi = populasi.Select(k => new Kromoson<TAlel>(k)).ToList();
         var random = new Random();
 
         var daftarProbabilitasCrossover = Enumerable.Range(1, JumlahPopulasi).Select(x => random.NextDouble());
@@ -152,16 +153,16 @@ public class Agen
         return newPopulasi;
     }
 
-    public List<double> HitungFitnessPopulasi(List<Kromoson<int>> populasi) => populasi.Select(k => FungsiObjektif(Encoding.Decode(k))).ToList();
+    public List<double> HitungFitnessPopulasi(List<Kromoson<TAlel>> populasi) => populasi.Select(k => FungsiObjektif(Encoding.Decode(k))).ToList();
 
-    public bool IsPopulasiKonvergen(List<Kromoson<int>> populasi)
+    public bool IsPopulasiKonvergen(List<Kromoson<TAlel>> populasi)
     {
         var konvergensi = HitungKonvergensiPopulasi(populasi);
 
         return konvergensi > BatasKonvergensiPopulasi;
     }
 
-    public double HitungKonvergensiPopulasi(List<Kromoson<int>> populasi)
+    public double HitungKonvergensiPopulasi(List<Kromoson<TAlel>> populasi)
     {
         var evaluasi = HitungFitnessPopulasi(populasi);
 
@@ -175,19 +176,19 @@ public class Agen
         return jumlahIndividuSama / (double)populasi.Count;
     }
 
-    public List<Kromoson<int>> Mutasi(List<Kromoson<int>> populasi)
+    public List<Kromoson<TAlel>> Mutasi(List<Kromoson<TAlel>> populasi)
     {
-        var newPopulasi = new List<Kromoson<int>>();
+        var newPopulasi = new List<Kromoson<TAlel>>();
         var random = new Random();
 
         foreach (var kromoson in populasi)
         {
-            var newKromoson = new Kromoson<int>(kromoson);
+            var newKromoson = new Kromoson<TAlel>(kromoson);
             for (var i = 0; i < newKromoson.DaftarAlel.Count; i++)
             {
                 var p = random.NextDouble();
                 if (p <= ProbabilitasMutasi)
-                    newKromoson.DaftarAlel[i] = newKromoson.DaftarAlel[i] == 1 ? 0 : 1;
+                    newKromoson = Encoding.Mutasi(kromoson, i);
             }
 
             newPopulasi.Add(newKromoson);
