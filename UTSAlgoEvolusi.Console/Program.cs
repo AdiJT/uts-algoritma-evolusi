@@ -52,5 +52,5 @@ for (int i = 0; i < jumlahPercobaan; i++)
 {
     result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
     globalBest = encoding.Decode(result.GlobalBest);
-    Console.WriteLine($"Percobaa Ke-{i+1}. Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
+    Console.WriteLine($"Percobaan Ke-{i+1}. Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
 }
