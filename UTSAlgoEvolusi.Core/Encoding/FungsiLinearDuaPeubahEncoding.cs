@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace UTSAlgoEvolusi.Core.Encoding;
 
-public class BinerFungsiLinearDuaPeubahEncoding : IEncoding<int, LinearDuaPeubah>
+public class FungsiLinearDuaPeubahEncoding : IEncoding<int, LinearDuaPeubah>
 {
     private (double bawah, double atas) _batasX;
     private (double bawah, double atas) _batasY;

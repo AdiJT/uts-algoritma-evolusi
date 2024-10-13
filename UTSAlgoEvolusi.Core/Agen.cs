@@ -140,7 +140,7 @@ public class Agen
             //Mutasi
             populasi = Mutasi(populasi);
 
-            populasiPerGenerasi.Add(populasi);
+            populasiPerGenerasi.Add(populasi.Select(k => new Kromoson<int>(k)).ToList());
 
             counterGenerasi++;
         }
