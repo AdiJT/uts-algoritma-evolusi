@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace UTSAlgoEvolusi.Core.Abstractions;
 
-public interface ISeleksi
+public interface ISeleksi<TAlel, TAsli>
 {
-    List<Kromoson> Seleksi(AgenFungsiLinearDuaPeubah agen, List<Kromoson> populasi);
+    List<Kromoson<TAlel>> Seleksi(List<Kromoson<TAlel>> populasi, IEncoding<TAlel, TAsli> encoding, Func<TAsli, double> fungsiObjektif, JenisAgen jenis);
 }

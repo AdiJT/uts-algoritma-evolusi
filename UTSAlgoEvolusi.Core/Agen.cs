@@ -11,27 +11,30 @@ public enum JenisAgen
     Max, Min
 }
 
-public class AgenBinaryResult
+public class AgenResult
 {
-    public Kromoson GlobalBest { get; }
-    public List<Kromoson> LocalBests { get; }
+    public Kromoson<int> GlobalBest { get; }
+    public List<List<Kromoson<int>>> PopulasiPerGenerasi { get; }
+    public List<Kromoson<int>> LocalBests { get; }
     public double KonvergensiPopulasi { get; }
     public int CounterGenerasi { get; }
 
-    public AgenBinaryResult(
-        Kromoson globalBest, 
-        List<Kromoson> localBest, 
-        double konvergensiPopulasi, 
+    public AgenResult(
+        Kromoson<int> globalBest,
+        List<Kromoson<int>> localBest,
+        List<List<Kromoson<int>>> populasiPerGenerasi,
+        double konvergensiPopulasi,
         int counterGenerasi)
     {
         GlobalBest = globalBest;
         LocalBests = localBest;
         KonvergensiPopulasi = konvergensiPopulasi;
         CounterGenerasi = counterGenerasi;
+        PopulasiPerGenerasi = populasiPerGenerasi;
     }
 }
 
-public class AgenFungsiLinearDuaPeubah
+public class Agen
 {
     private (double bawah, double atas) _batasX;
     private (double bawah, double atas) _batasY;
@@ -42,12 +45,12 @@ public class AgenFungsiLinearDuaPeubah
     public double ProbabilitasCrossover { get; set; } = 0.50;
     public double ProbabilitasMutasi { get; set; } = 0.1;
     public double BatasKonvergensiPopulasi { get; set; } = 0.8;
+
     public Func<LinearDuaPeubah, double> FungsiObjektif { get; set; }
 
-    public ISeleksi Seleksi { get; set; }
-    public ICrossover Crossover { get; set; }
-    public IEncoder<int, LinearDuaPeubah> Encoder { get; set; }
-    public IDecoder<int, LinearDuaPeubah> Decoder { get; set; }
+    public ISeleksi<int, LinearDuaPeubah> Seleksi { get; set; }
+    public ICrossover<int> Crossover { get; set; }
+    public IEncoding<int, LinearDuaPeubah> Encoding { get; set;}
 
     public (double bawah, double atas) BatasX
     {
@@ -73,34 +76,33 @@ public class AgenFungsiLinearDuaPeubah
         }
     }
 
-    public AgenFungsiLinearDuaPeubah(
+    public Agen(
         Func<LinearDuaPeubah, double> fungsiObjektif,
+        ISeleksi<int, LinearDuaPeubah> seleksi,
+        IEncoding<int, LinearDuaPeubah> encoding,
+        ICrossover<int> crossover,
         (double bawah, double atas) batasX,
-        (double bawah, double atas) batasY,
-        ISeleksi seleksi,
-        ICrossover crossover,
-        IEncoder<int, LinearDuaPeubah> encoder,
-        IDecoder<int, LinearDuaPeubah> decoder)
+        (double bawah, double atas) batasY)
     {
         FungsiObjektif = fungsiObjektif;
-        BatasX = batasX;
-        BatasY = batasY;
         Seleksi = seleksi;
         Crossover = crossover;
-        Encoder = encoder;
-        Decoder = decoder;
+        Encoding = encoding;
+        BatasX = batasX;
+        BatasY = batasY;
     }
 
-    public AgenBinaryResult Execute()
+    public AgenResult Execute()
     {
         return Execute(GeneratePopulasiAwal());
     }
 
-    public AgenBinaryResult Execute(List<Kromoson> populasi)
+    public AgenResult Execute(List<Kromoson<int>> populasi)
     {
         var counterGenerasi = -1;
-        var localBests = new List<Kromoson>();
-        Kromoson? globalBest = null;
+        var localBests = new List<Kromoson<int>>();
+        Kromoson<int>? globalBest = null;
+        var populasiPerGenerasi = new List<List<Kromoson<int>>>();
         double globalBestFitness = JenisAgen == JenisAgen.Max ? double.MinValue : double.MaxValue;
         var random = new Random();
 
@@ -111,7 +113,7 @@ public class AgenFungsiLinearDuaPeubah
 
             var localBestFitness = JenisAgen == JenisAgen.Max ? fitnessPopulasi.Max() : fitnessPopulasi.Min();
             var localBestIndex = fitnessPopulasi.IndexOf(localBestFitness);
-            var localBest = new Kromoson(populasi[localBestIndex]);
+            var localBest = new Kromoson<int>(populasi[localBestIndex]);
 
             localBests.Add(localBest);
             if (globalBest is null)
@@ -130,7 +132,7 @@ public class AgenFungsiLinearDuaPeubah
             }
 
             //Seleksi
-            populasi = Seleksi.Seleksi(this, populasi);
+            populasi = Seleksi.Seleksi(populasi, Encoding, FungsiObjektif, JenisAgen);
 
             //Kawin Silang
             populasi = KawinSilang(populasi);
@@ -138,17 +140,19 @@ public class AgenFungsiLinearDuaPeubah
             //Mutasi
             populasi = Mutasi(populasi);
 
+            populasiPerGenerasi.Add(populasi);
+
             counterGenerasi++;
         }
 
-        var hasil = new AgenBinaryResult(globalBest!, localBests, HitungKonvergensiPopulasi(populasi), counterGenerasi);
+        var hasil = new AgenResult(globalBest!, localBests, populasiPerGenerasi, HitungKonvergensiPopulasi(populasi), counterGenerasi);
 
         return hasil;
     }
 
-    private List<Kromoson> KawinSilang(List<Kromoson> populasi)
+    private List<Kromoson<int>> KawinSilang(List<Kromoson<int>> populasi)
     {
-        var newPopulasi = populasi.Select(k => new Kromoson(k)).ToList();
+        var newPopulasi = populasi.Select(k => new Kromoson<int>(k)).ToList();
         var random = new Random();
 
         var daftarProbabilitasCrossover = Enumerable.Range(1, JumlahPopulasi).Select(x => random.NextDouble());
@@ -164,14 +168,14 @@ public class AgenFungsiLinearDuaPeubah
         {
             if (i != indexKawinSilang.Length - 1)
             {
-                var hasilKawin = Crossover.Crossover(this, kandidatKawinSilang[indexKawinSilang[i]], kandidatKawinSilang[indexKawinSilang[i + 1]]);
+                var hasilKawin = Crossover.Crossover(kandidatKawinSilang[indexKawinSilang[i]], kandidatKawinSilang[indexKawinSilang[i + 1]]);
                 newPopulasi[indexKawinSilang[i]] = hasilKawin.anak1;
                 newPopulasi[indexKawinSilang[i + 1]] = hasilKawin.anak2;
             }
             else
             {
                 var parent2Index = random.GetItem(indexKawinSilang.Take(indexKawinSilang.Length - 1));
-                var hasilKawin = Crossover.Crossover(this, kandidatKawinSilang[indexKawinSilang[i]], kandidatKawinSilang[indexKawinSilang[parent2Index]]);
+                var hasilKawin = Crossover.Crossover(kandidatKawinSilang[indexKawinSilang[i]], kandidatKawinSilang[indexKawinSilang[parent2Index]]);
                 newPopulasi[indexKawinSilang[i]] = hasilKawin.anak1;
             }
         }
@@ -179,31 +183,31 @@ public class AgenFungsiLinearDuaPeubah
         return newPopulasi;
     }
 
-    public List<double> HitungFitnessPopulasi(List<Kromoson> populasi) => populasi.Select(k => FungsiObjektif(Decoder.Decode(k.Gen)) ).ToList();
+    public List<double> HitungFitnessPopulasi(List<Kromoson<int>> populasi) => populasi.Select(k => FungsiObjektif(Encoding.Decode(k))).ToList();
 
-    public List<Kromoson> GeneratePopulasiAwal()
+    public List<Kromoson<int>> GeneratePopulasiAwal()
     {
-        var populasiAwal = new List<Kromoson>();
+        var populasiAwal = new List<Kromoson<int>>();
         var random = new Random();
 
         for (var i = 0; i < JumlahPopulasi; i++)
         {
             var randX = random.NextDouble(BatasX.bawah, BatasX.atas);
             var randY = random.NextDouble(BatasY.bawah, BatasY.atas);
-            populasiAwal.Add(new Kromoson(Encoder.Encode(new LinearDuaPeubah { X = randX, Y = randY })));
+            populasiAwal.Add(Encoding.Encode(new LinearDuaPeubah { X = randX, Y = randY }));
         }
 
         return populasiAwal;
     }
 
-    public bool IsPopulasiKonvergen(List<Kromoson> populasi)
+    public bool IsPopulasiKonvergen(List<Kromoson<int>> populasi)
     {
         var konvergensi = HitungKonvergensiPopulasi(populasi);
 
         return konvergensi > BatasKonvergensiPopulasi;
     }
 
-    public double HitungKonvergensiPopulasi(List<Kromoson> populasi)
+    public double HitungKonvergensiPopulasi(List<Kromoson<int>> populasi)
     {
         var evaluasi = HitungFitnessPopulasi(populasi);
 
@@ -217,19 +221,19 @@ public class AgenFungsiLinearDuaPeubah
         return jumlahIndividuSama / (double)populasi.Count;
     }
 
-    public List<Kromoson> Mutasi(List<Kromoson> populasi)
+    public List<Kromoson<int>> Mutasi(List<Kromoson<int>> populasi)
     {
-        var newPopulasi = new List<Kromoson>();
+        var newPopulasi = new List<Kromoson<int>>();
         var random = new Random();
 
         foreach (var kromoson in populasi)
         {
-            var newKromoson = new Kromoson(kromoson);
-            for (var i = 0; i < newKromoson.PanjangGen; i++)
+            var newKromoson = new Kromoson<int>(kromoson);
+            for (var i = 0; i < newKromoson.DaftarAlel.Count; i++)
             {
                 var p = random.NextDouble();
                 if (p <= ProbabilitasMutasi)
-                    newKromoson[i] = newKromoson[i] == 1 ? 0 : 1;
+                    newKromoson.DaftarAlel[i] = newKromoson.DaftarAlel[i] == 1 ? 0 : 1;
             }
 
             newPopulasi.Add(newKromoson);

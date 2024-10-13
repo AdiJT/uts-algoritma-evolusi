@@ -1,6 +1,6 @@
 ﻿namespace UTSAlgoEvolusi.Core.Abstractions;
 
-public interface ICrossover
+public interface ICrossover<TAlel>
 {
-    (Kromoson anak1, Kromoson anak2) Crossover(AgenFungsiLinearDuaPeubah agen, Kromoson parent1, Kromoson parent2);
+    (Kromoson<TAlel> anak1, Kromoson<TAlel> anak2) Crossover(Kromoson<TAlel> parent1, Kromoson<TAlel> parent2);
 }

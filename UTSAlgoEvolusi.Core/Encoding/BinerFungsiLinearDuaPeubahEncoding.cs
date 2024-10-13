@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using UTSAlgoEvolusi.Core.Abstractions;
 using UTSAlgoEvolusi.Core.Utils;
+using System.Linq;
 
-namespace UTSAlgoEvolusi.Core.Encoder;
+namespace UTSAlgoEvolusi.Core.Encoding;
 
-public class BinaryEncoder : IEncoder<int, LinearDuaPeubah>
+public class BinerFungsiLinearDuaPeubahEncoding : IEncoding<int, LinearDuaPeubah>
 {
     private (double bawah, double atas) _batasX;
     private (double bawah, double atas) _batasY;
     private int _presisi;
 
-    public (double bawah, double atas) BatasX 
+    public (double bawah, double atas) BatasX
     {
         get => _batasX;
         set
@@ -23,9 +23,9 @@ public class BinaryEncoder : IEncoder<int, LinearDuaPeubah>
         }
     }
 
-    public (double bawah, double atas) BatasY 
-    { 
-        get => _batasY; 
+    public (double bawah, double atas) BatasY
+    {
+        get => _batasY;
         set
         {
             if (value.bawah > value.atas)
@@ -35,24 +35,24 @@ public class BinaryEncoder : IEncoder<int, LinearDuaPeubah>
         }
     }
 
-    public int Presisi 
-    { 
-        get => _presisi; 
-        set 
+    public int Presisi
+    {
+        get => _presisi;
+        set
         {
             if (value <= 0)
                 throw new ArgumentException("Presisi 0 atau negatif");
 
             _presisi = value;
-        } 
+        }
     }
 
     public int PanjangGenX => (int)Math.Log2((BatasX.atas - BatasX.bawah) * Math.Pow(10, Presisi)) + 1;
     public int PanjangGenY => (int)Math.Log2((BatasY.atas - BatasY.bawah) * Math.Pow(10, Presisi)) + 1;
     public int PanjangGen => PanjangGenX + PanjangGenY;
 
-    public List<int> Encode(LinearDuaPeubah asli)
-    { 
+    public Kromoson<int> Encode(LinearDuaPeubah asli)
+    {
         if (PanjangGenX <= 0)
             throw new Exception("PanjangGenX 0 atau negatif");
 
@@ -74,6 +74,17 @@ public class BinaryEncoder : IEncoder<int, LinearDuaPeubah>
         var xBiner = BinaryConverter.ToBinary(xDecimal, PanjangGenX);
         var yBiner = BinaryConverter.ToBinary(yDecimal, PanjangGenY);
 
-        return [..xBiner, ..yBiner];
+        return new Kromoson<int>(xBiner.Concat(yBiner).ToList());
+    }
+
+    public LinearDuaPeubah Decode(Kromoson<int> kromoson)
+    {
+        var xDecimal = BinaryConverter.ToInt(kromoson.DaftarAlel.Take(PanjangGenX).ToList());
+        var x = BatasX.bawah + xDecimal * ((BatasX.atas - BatasX.bawah) / (Math.Pow(2, PanjangGenX) - 1));
+
+        var yDecimal = BinaryConverter.ToInt(kromoson.DaftarAlel.Take(new Range(PanjangGenY, Index.End)).ToList());
+        var y = BatasY.bawah + yDecimal * ((BatasY.atas - BatasY.bawah) / (Math.Pow(2, PanjangGenY) - 1));
+
+        return new LinearDuaPeubah { X = x, Y = y };
     }
 }

@@ -4,36 +4,22 @@ using System.Linq;
 
 namespace UTSAlgoEvolusi.Core;
 
-public class Kromoson
+public class Kromoson<TAlel>
 {
-    public List<int> Gen { get; }
+    public List<TAlel> DaftarAlel { get; }
 
-    public int PanjangGen => Gen.Count;
-
-    public int this[int index]
+    public Kromoson(int jumlahAlel)
     {
-        get => Gen[index];
-        set 
-        {
-            if (value != 0 && value != 1)
-                throw new ArgumentException("value harus 0 atau 1");
-
-            Gen[index] = value;
-        }
+        DaftarAlel = new List<TAlel>(new TAlel[jumlahAlel]);
     }
 
-    public Kromoson(int panjangGen)
+    public Kromoson(List<TAlel> gen)
     {
-        Gen = Enumerable.Repeat(0, panjangGen).ToList();
+        DaftarAlel = gen.Select(x => x).ToList();
     }
 
-    public Kromoson(List<int> gen)
+    public Kromoson(Kromoson<TAlel> kromoson)
     {
-        Gen = gen;
-    }
-
-    public Kromoson(Kromoson kromoson)
-    {
-        Gen = kromoson.Gen.Select(x => x).ToList();
+        DaftarAlel = kromoson.DaftarAlel.Select(x => x).ToList();
     }
 }
