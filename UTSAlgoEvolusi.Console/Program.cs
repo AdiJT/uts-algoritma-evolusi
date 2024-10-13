@@ -20,8 +20,8 @@ var roulleteWheel = new RouletteWheel<int, LinearDuaPeubah>();
 var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, roulleteWheel, encoding, spx)
 {
     JenisAgen = JenisAgen.Min,
-    JumlahGenerasi = 10000,
-    JumlahPopulasi = 100,
+    JumlahGenerasi = 2000,
+    JumlahPopulasi = 10,
     BatasKonvergensiPopulasi = .8,
 };
 
@@ -45,4 +45,12 @@ for (int i = 0; i < result.LocalBests.Count; i++)
     var kromoson = result.LocalBests[i];
     var decoded = encoding.Decode(kromoson);
     Console.WriteLine($"Generasi {i + 1} : (x : {decoded.X:F8}, y : {decoded.Y:F8}), f(x, y) = {fungsiObjektif(decoded):F8}");
+}
+
+var jumlahPercobaan = 100;
+for (int i = 0; i < jumlahPercobaan; i++)
+{
+    result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
+    globalBest = encoding.Decode(result.GlobalBest);
+    Console.WriteLine($"Percobaa Ke-{i+1}. Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
 }

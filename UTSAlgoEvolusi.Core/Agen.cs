@@ -36,6 +36,8 @@ public class AgenResult<TAlel>
 
 public class Agen<TAlel, TAsli>
 {
+    private readonly CustomDoubleEqualityComparer _customDoubleEqualityComparer = new(1e-7);
+
     public JenisAgen JenisAgen { get; set; } = JenisAgen.Min;
     public int JumlahGenerasi { get; set; } = 1000;
     public int JumlahPopulasi { get; set; } = 10;
@@ -166,7 +168,7 @@ public class Agen<TAlel, TAsli>
     {
         var evaluasi = HitungFitnessPopulasi(populasi);
 
-        var hashSet = new HashSet<double>();
+        var hashSet = new HashSet<double>(_customDoubleEqualityComparer);
         var jumlahIndividuSama = 1;
 
         foreach(var eval in evaluasi)
