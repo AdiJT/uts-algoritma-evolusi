@@ -36,9 +36,6 @@ public class AgenResult
 
 public class Agen
 {
-    private (double bawah, double atas) _batasX;
-    private (double bawah, double atas) _batasY;
-
     public JenisAgen JenisAgen { get; set; } = JenisAgen.Min;
     public int JumlahGenerasi { get; set; } = 1000;
     public int JumlahPopulasi { get; set; } = 10;
@@ -52,30 +49,6 @@ public class Agen
     public ICrossover<int> Crossover { get; set; }
     public IEncoding<int, LinearDuaPeubah> Encoding { get; set;}
 
-    public (double bawah, double atas) BatasX
-    {
-        get => _batasX;
-        set
-        {
-            if (value.bawah > value.atas)
-                throw new ArgumentException("BatasX.bawah lebih dari BatasX.atas");
-
-            _batasX = value;
-        }
-    }
-
-    public (double bawah, double atas) BatasY
-    {
-        get => _batasY;
-        set
-        {
-            if (value.bawah > value.atas)
-                throw new ArgumentException("BatasY.bawah lebih dari BatasY.atas");
-
-            _batasY = value;
-        }
-    }
-
     public Agen(
         Func<LinearDuaPeubah, double> fungsiObjektif,
         ISeleksi<int, LinearDuaPeubah> seleksi,
@@ -88,18 +61,14 @@ public class Agen
         Seleksi = seleksi;
         Crossover = crossover;
         Encoding = encoding;
-        BatasX = batasX;
-        BatasY = batasY;
     }
 
-    public AgenResult Execute()
+    public AgenResult Execute(List<Kromoson<int>> populasiAwal)
     {
-        return Execute(GeneratePopulasiAwal());
-    }
+        var populasi = populasiAwal.Select(k => new Kromoson<int>(k)).ToList();
 
-    public AgenResult Execute(List<Kromoson<int>> populasi)
-    {
         var counterGenerasi = -1;
+
         var localBests = new List<Kromoson<int>>();
         Kromoson<int>? globalBest = null;
         var populasiPerGenerasi = new List<List<Kromoson<int>>>();
@@ -184,21 +153,6 @@ public class Agen
     }
 
     public List<double> HitungFitnessPopulasi(List<Kromoson<int>> populasi) => populasi.Select(k => FungsiObjektif(Encoding.Decode(k))).ToList();
-
-    public List<Kromoson<int>> GeneratePopulasiAwal()
-    {
-        var populasiAwal = new List<Kromoson<int>>();
-        var random = new Random();
-
-        for (var i = 0; i < JumlahPopulasi; i++)
-        {
-            var randX = random.NextDouble(BatasX.bawah, BatasX.atas);
-            var randY = random.NextDouble(BatasY.bawah, BatasY.atas);
-            populasiAwal.Add(Encoding.Encode(new LinearDuaPeubah { X = randX, Y = randY }));
-        }
-
-        return populasiAwal;
-    }
 
     public bool IsPopulasiKonvergen(List<Kromoson<int>> populasi)
     {
