@@ -37,12 +37,12 @@ Console.WriteLine($"Batas Konvergensi : {agen.BatasKonvergensiPopulasi:P2}");
 var result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
 
 var globalBest = encoding.Decode(result.GlobalBest);
-Console.WriteLine($"Global Best : (x : {globalBest.X}, y : {globalBest.Y}), f(x, y) = {fungsiObjektif(globalBest)}");
+Console.WriteLine($"Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
 Console.WriteLine("Local Best");
 
 for (int i = 0; i < result.LocalBests.Count; i++)
 {
     var kromoson = result.LocalBests[i];
     var decoded = encoding.Decode(kromoson);
-    Console.WriteLine($"Generasi {i + 1} : (x : {decoded.X}, y : {decoded.Y}), f(x, y) = {fungsiObjektif(decoded)}");
+    Console.WriteLine($"Generasi {i + 1} : (x : {decoded.X:F8}, y : {decoded.Y:F8}), f(x, y) = {fungsiObjektif(decoded):F8}");
 }
