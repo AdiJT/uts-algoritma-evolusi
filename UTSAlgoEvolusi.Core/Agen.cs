@@ -168,7 +168,7 @@ public class Agen<TAlel, TAsli>
     {
         var evaluasi = HitungFitnessPopulasi(populasi);
 
-        var hashSet = new HashSet<double>(_customDoubleEqualityComparer);
+        var hashSet = new HashSet<double>();
         var jumlahIndividuSama = 1;
 
         foreach(var eval in evaluasi)

@@ -3,15 +3,13 @@ using UTSAlgoEvolusi.Core.Crossover;
 using UTSAlgoEvolusi.Core.Encoding;
 using UTSAlgoEvolusi.Core.Seleksi;
 
-var fungsiObjektif = (LinearDuaPeubah args) => 
-    (args.X * args.X - 10 * Math.Cos(2 * Math.PI * args.X)) + 
-    (args.Y * args.Y - 10 * Math.Cos(2 * Math.PI * args.Y)) + 20;
+var fungsiObjektif = (LinearDuaPeubah args) => 100 * (args.X * args.X - args.Y) * (args.X * args.X - args.Y) + (1 - args.X) * (1 - args.X);
 
 var encoding = new FungsiLinearDuaPeubahEncoding() 
 {
     Presisi = 4,
-    BatasX = (-5.12, 5.12),
-    BatasY = (-5.12, 5.12)
+    BatasX = (-2.048, 2.048),
+    BatasY = (-2.048, 2.048)
 };
 
 var spx = new SinglePointCrossover<int>();
@@ -25,7 +23,7 @@ var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, roulleteWheel, encodin
     BatasKonvergensiPopulasi = .8,
 };
 
-Console.WriteLine("Meminimumkan Fungsi Objektif : f(x, y) = (x^2 - 10cos(2PIx)) + y^2 - 10cos(2PIy) + 20");
+Console.WriteLine("Meminimumkan Fungsi Objektif : f(x, y) = 100(x^2 - y)^2 + (1 - x)^2");
 Console.WriteLine($"Batas: {encoding.BatasX.bawah} <= x <= {encoding.BatasX.atas} ");
 Console.WriteLine($"Batas: {encoding.BatasY.bawah} <= y <= {encoding.BatasY.atas} ");
 Console.WriteLine($"Jumlah Generasi : {agen.JumlahGenerasi}");
