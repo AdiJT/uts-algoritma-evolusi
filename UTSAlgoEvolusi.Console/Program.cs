@@ -12,14 +12,14 @@ var encoding = new FungsiLinearDuaPeubahEncoding()
     BatasY = (-2.048, 2.048)
 };
 
-var spx = new SinglePointCrossover<int>();
+var crossover = new TwoPointCrossover<int>();
 var roulleteWheel = new RouletteWheel<int, LinearDuaPeubah>();
 
-var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, roulleteWheel, encoding, spx)
+var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, roulleteWheel, encoding, crossover)
 {
     JenisAgen = JenisAgen.Min,
-    JumlahGenerasi = 2000,
-    JumlahPopulasi = 10,
+    JumlahGenerasi = 200,
+    JumlahPopulasi = 250,
     BatasKonvergensiPopulasi = .8,
 };
 
@@ -36,6 +36,7 @@ var result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
 
 var globalBest = encoding.Decode(result.GlobalBest);
 Console.WriteLine($"Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
+Console.WriteLine($"Generasi Global Best : {result.GenerasiGlobalBest}");
 Console.WriteLine("Local Best");
 
 for (int i = 0; i < result.LocalBests.Count; i++)

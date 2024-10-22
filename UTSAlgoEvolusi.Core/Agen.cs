@@ -18,19 +18,22 @@ public class AgenResult<TAlel>
     public List<Kromoson<TAlel>> LocalBests { get; }
     public double KonvergensiPopulasi { get; }
     public int CounterGenerasi { get; }
+    public int GenerasiGlobalBest { get; }
 
     public AgenResult(
         Kromoson<TAlel> globalBest,
         List<Kromoson<TAlel>> localBest,
         List<List<Kromoson<TAlel>>> populasiPerGenerasi,
         double konvergensiPopulasi,
-        int counterGenerasi)
+        int counterGenerasi,
+        int generasiGlobalBest)
     {
         GlobalBest = globalBest;
         LocalBests = localBest;
         KonvergensiPopulasi = konvergensiPopulasi;
         CounterGenerasi = counterGenerasi;
         PopulasiPerGenerasi = populasiPerGenerasi;
+        GenerasiGlobalBest = generasiGlobalBest;
     }
 }
 
@@ -75,6 +78,7 @@ public class Agen<TAlel, TAsli>
         var localBests = new List<Kromoson<TAlel>>();
         Kromoson<TAlel>? globalBest = null;
         double globalBestFitness = JenisAgen == JenisAgen.Max ? double.MinValue : double.MaxValue;
+        int generasiGlobalBest = -1;
 
         var random = new Random();
 
@@ -92,6 +96,7 @@ public class Agen<TAlel, TAsli>
             {
                 globalBest = localBest;
                 globalBestFitness = localBestFitness;
+                generasiGlobalBest = counterGenerasi;
             }
             else
             {
@@ -100,6 +105,7 @@ public class Agen<TAlel, TAsli>
                 {
                     globalBest = localBest;
                     globalBestFitness = localBestFitness;
+                    generasiGlobalBest = counterGenerasi;
                 }
             }
 
@@ -117,7 +123,13 @@ public class Agen<TAlel, TAsli>
             counterGenerasi++;
         }
 
-        var hasil = new AgenResult<TAlel>(globalBest!, localBests, populasiPerGenerasi, HitungKonvergensiPopulasi(populasi), counterGenerasi);
+        var hasil = new AgenResult<TAlel>(
+            globalBest!, 
+            localBests, 
+            populasiPerGenerasi, 
+            HitungKonvergensiPopulasi(populasi), 
+            counterGenerasi,
+            generasiGlobalBest);
 
         return hasil;
     }
