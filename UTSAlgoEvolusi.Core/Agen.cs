@@ -14,7 +14,6 @@ public enum JenisAgen
 public class AgenResult<TAlel>
 {
     public Kromoson<TAlel> GlobalBest { get; }
-    public List<List<Kromoson<TAlel>>> PopulasiPerGenerasi { get; }
     public List<Kromoson<TAlel>> LocalBests { get; }
     public double KonvergensiPopulasi { get; }
     public int CounterGenerasi { get; }
@@ -32,27 +31,25 @@ public class AgenResult<TAlel>
         LocalBests = localBest;
         KonvergensiPopulasi = konvergensiPopulasi;
         CounterGenerasi = counterGenerasi;
-        PopulasiPerGenerasi = populasiPerGenerasi;
         GenerasiGlobalBest = generasiGlobalBest;
     }
 }
 
 public class Agen<TAlel, TAsli>
 {
-    private readonly CustomDoubleEqualityComparer _customDoubleEqualityComparer = new(1e-7);
-
     public JenisAgen JenisAgen { get; set; } = JenisAgen.Min;
     public int JumlahGenerasi { get; set; } = 1000;
     public int JumlahPopulasi { get; set; } = 10;
     public double ProbabilitasCrossover { get; set; } = 0.50;
     public double ProbabilitasMutasi { get; set; } = 0.1;
     public double BatasKonvergensiPopulasi { get; set; } = 0.8;
+    public double BatasSelisihFitness { get; set; } = 1e-7;
 
     public Func<TAsli, double> FungsiObjektif { get; set; }
 
     public ISeleksi<TAlel, TAsli> Seleksi { get; set; }
     public ICrossover<TAlel> Crossover { get; set; }
-    public IEncoding<TAlel, TAsli> Encoding { get; set;}
+    public IEncoding<TAlel, TAsli> Encoding { get; set; }
 
     public Agen(
         Func<TAsli, double> fungsiObjektif,
@@ -66,7 +63,7 @@ public class Agen<TAlel, TAsli>
         Encoding = encoding;
     }
 
-    public AgenResult<TAlel> Execute(List<Kromoson<TAlel>> populasiAwal)
+    public AgenResult<TAlel> Execute(List<Kromoson<TAlel>> populasiAwal, bool verbose = false)
     {
         if (populasiAwal.Count != JumlahPopulasi)
             throw new ArgumentException("jumlah populasiAwal tidak sama dengan JumlahPopulasi");
@@ -109,6 +106,16 @@ public class Agen<TAlel, TAsli>
                 }
             }
 
+            if (verbose)
+            {
+                var lbDecoded = Encoding.Decode(localBest);
+                var konvergensiPopulasi = HitungKonvergensiPopulasi(populasi);
+
+                Console.WriteLine($"Generasi : {counterGenerasi + 1}");
+                Console.WriteLine($"\tLocal Best : {lbDecoded}. f={FungsiObjektif(lbDecoded)}");
+                Console.WriteLine($"\tKonvergensi Populasi : {konvergensiPopulasi:P2}");
+            }
+
             //Seleksi
             populasi = Seleksi.Seleksi(populasi, Encoding, FungsiObjektif, JenisAgen);
 
@@ -124,10 +131,10 @@ public class Agen<TAlel, TAsli>
         }
 
         var hasil = new AgenResult<TAlel>(
-            globalBest!, 
-            localBests, 
-            populasiPerGenerasi, 
-            HitungKonvergensiPopulasi(populasi), 
+            globalBest!,
+            localBests,
+            populasiPerGenerasi,
+            HitungKonvergensiPopulasi(populasi),
             counterGenerasi,
             generasiGlobalBest);
 
@@ -148,7 +155,7 @@ public class Agen<TAlel, TAsli>
 
         random.Shuffle(indexKawinSilang);
 
-        for(var i = 0; i < indexKawinSilang.Length; i += 2)
+        for (var i = 0; i < indexKawinSilang.Length; i += 2)
         {
             if (i != indexKawinSilang.Length - 1)
             {
@@ -183,9 +190,25 @@ public class Agen<TAlel, TAsli>
         var hashSet = new HashSet<double>();
         var jumlahIndividuSama = 1;
 
-        foreach(var eval in evaluasi)
-            if (!hashSet. Add(eval))
-                jumlahIndividuSama++;
+        foreach (var eval in evaluasi)
+        {
+            var individuSamaDitemukan = false;
+            foreach (var k in hashSet)
+            {
+                if (Math.Abs(eval - k) <= BatasSelisihFitness)
+                {
+                    jumlahIndividuSama++;
+                    individuSamaDitemukan = true;
+                    break;
+                }
+            }
+
+            if (!individuSamaDitemukan)
+            {
+                if (!hashSet.Add(eval))
+                    throw new Exception($"eval:{eval} telah ada di hashset");
+            }
+        }
 
         return jumlahIndividuSama / (double)populasi.Count;
     }

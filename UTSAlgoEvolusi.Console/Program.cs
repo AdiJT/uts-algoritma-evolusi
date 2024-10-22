@@ -18,9 +18,11 @@ var roulleteWheel = new RouletteWheel<int, LinearDuaPeubah>();
 var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, roulleteWheel, encoding, crossover)
 {
     JenisAgen = JenisAgen.Min,
-    JumlahGenerasi = 200,
-    JumlahPopulasi = 250,
-    BatasKonvergensiPopulasi = .8,
+    JumlahGenerasi = 100,
+    JumlahPopulasi = 300,
+    BatasKonvergensiPopulasi = 0.8,
+    ProbabilitasMutasi = 0.1,
+    ProbabilitasCrossover = 0.7
 };
 
 Console.WriteLine("Meminimumkan Fungsi Objektif : f(x, y) = 100(x^2 - y)^2 + (1 - x)^2");
@@ -32,24 +34,8 @@ Console.WriteLine($"Probabilitas Crossover : {agen.ProbabilitasCrossover:P2}");
 Console.WriteLine($"Probabilitas Mutasi : {agen.ProbabilitasMutasi:P2}");
 Console.WriteLine($"Batas Konvergensi : {agen.BatasKonvergensiPopulasi:P2}");
 
-var result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
+var result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi), true);
 
 var globalBest = encoding.Decode(result.GlobalBest);
 Console.WriteLine($"Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
-Console.WriteLine($"Generasi Global Best : {result.GenerasiGlobalBest}");
-Console.WriteLine("Local Best");
-
-for (int i = 0; i < result.LocalBests.Count; i++)
-{
-    var kromoson = result.LocalBests[i];
-    var decoded = encoding.Decode(kromoson);
-    Console.WriteLine($"Generasi {i + 1} : (x : {decoded.X:F8}, y : {decoded.Y:F8}), f(x, y) = {fungsiObjektif(decoded):F8}");
-}
-
-var jumlahPercobaan = 100;
-for (int i = 0; i < jumlahPercobaan; i++)
-{
-    result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
-    globalBest = encoding.Decode(result.GlobalBest);
-    Console.WriteLine($"Percobaan Ke-{i+1}. Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
-}
+Console.WriteLine($"Generasi Global Best : {result.GenerasiGlobalBest + 1}");
