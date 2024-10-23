@@ -13,7 +13,7 @@ var encoding = new FungsiLinearDuaPeubahEncoding()
 };
 
 var crossover = new TwoPointCrossover<int>();
-var roulleteWheel = new RouletteWheel<int, LinearDuaPeubah>();
+var roulleteWheel = new TournamentSelection<int, LinearDuaPeubah>();
 
 var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, roulleteWheel, encoding, crossover)
 {
@@ -39,3 +39,34 @@ var result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi), verbos
 var globalBest = encoding.Decode(result.GlobalBest);
 Console.WriteLine($"Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
 Console.WriteLine($"Generasi Global Best : {result.GenerasiGlobalBest + 1}");
+
+var jumlahTes = 100;
+Console.WriteLine($"Tes Roulette Vs Tournament Selection. Jumlah Tes : {jumlahTes}");
+
+var daftarHasilTesRoulette = new List<double>();
+var daftarHasilTesTournament = new List<double>();
+
+agen.Seleksi = new RouletteWheel<int, LinearDuaPeubah>();
+for (int i = 0; i < jumlahTes; i++)
+{
+    var r = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
+    var gb = encoding.Decode(r.GlobalBest);
+    daftarHasilTesRoulette.Add(fungsiObjektif(gb));
+    Console.Write("|");
+}
+
+agen.Seleksi = new TournamentSelection<int, LinearDuaPeubah>();
+for (int i = 0; i < jumlahTes; i++)
+{
+    var r = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
+    var gb = encoding.Decode(r.GlobalBest);
+    daftarHasilTesTournament.Add(fungsiObjektif(gb));
+    Console.Write("|");
+}
+
+var rata2Roulette = daftarHasilTesRoulette.Average();
+var rata2Tournament = daftarHasilTesTournament.Average();
+
+Console.WriteLine($"\nHasil Roullette Vs Tournament Selection");
+Console.WriteLine($"Rata-rata fitness global best Roullette Wheel : {rata2Roulette:F8}");
+Console.WriteLine($"Rata-rata fitness global best Tournament Selection : {rata2Tournament:F8}");
