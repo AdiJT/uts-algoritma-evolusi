@@ -14,7 +14,7 @@ public class RouletteWheel<TAlel, TAsli> : ISeleksi<TAlel, TAsli>
         JenisAgen jenis)
     {
         var evalFunc = jenis == JenisAgen.Max ? fungsiObjektif : arg => 1 / fungsiObjektif(arg);
-        var daftarEvaluasi = populasi.Select(k => evalFunc(encoding.Decode(k)));
+        var daftarEvaluasi = populasi.Select(k => evalFunc(encoding.Decode(k))).ToList();
 
         var total = daftarEvaluasi.Sum();
         var probabilitasKumulatif = new List<double>();

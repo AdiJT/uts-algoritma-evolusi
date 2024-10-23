@@ -11,30 +11,6 @@ public enum JenisAgen
     Max, Min
 }
 
-public class AgenResult<TAlel>
-{
-    public Kromoson<TAlel> GlobalBest { get; }
-    public List<Kromoson<TAlel>> LocalBests { get; }
-    public double KonvergensiPopulasi { get; }
-    public int CounterGenerasi { get; }
-    public int GenerasiGlobalBest { get; }
-
-    public AgenResult(
-        Kromoson<TAlel> globalBest,
-        List<Kromoson<TAlel>> localBest,
-        List<List<Kromoson<TAlel>>> populasiPerGenerasi,
-        double konvergensiPopulasi,
-        int counterGenerasi,
-        int generasiGlobalBest)
-    {
-        GlobalBest = globalBest;
-        LocalBests = localBest;
-        KonvergensiPopulasi = konvergensiPopulasi;
-        CounterGenerasi = counterGenerasi;
-        GenerasiGlobalBest = generasiGlobalBest;
-    }
-}
-
 public class Agen<TAlel, TAsli>
 {
     public JenisAgen JenisAgen { get; set; } = JenisAgen.Min;
@@ -71,50 +47,30 @@ public class Agen<TAlel, TAsli>
         var populasi = populasiAwal.Select(k => new Kromoson<TAlel>(k)).ToList();
 
         var counterGenerasi = 0;
-        var populasiPerGenerasi = new List<List<Kromoson<TAlel>>>();
         var localBests = new List<Kromoson<TAlel>>();
-        Kromoson<TAlel>? globalBest = null;
-        double globalBestFitness = JenisAgen == JenisAgen.Max ? double.MinValue : double.MaxValue;
-        int generasiGlobalBest = -1;
+        int generasiGlobalBest = 0;
 
         var random = new Random();
+        Func<double, double, bool> compare = JenisAgen == JenisAgen.Max ? (double gb, double lb) => gb < lb : (double gb, double lb) => gb > lb;
+
+        //Perhitungan Fitness dan Penentuan Local dan Global Best Generasi 0
+        var fitnessPopulasi = HitungFitnessPopulasi(populasi);
+        double globalBestFitness = JenisAgen == JenisAgen.Max ? fitnessPopulasi.Max() : fitnessPopulasi.Min();
+        var globalBest = new Kromoson<TAlel>(populasi[fitnessPopulasi.IndexOf(globalBestFitness)]);
+        localBests.Add(globalBest);
+
+        if (verbose)
+        {
+            var gbDecoded = Encoding.Decode(globalBest);
+            var konvergensiPopulasi = HitungKonvergensiPopulasi(populasi);
+
+            Console.WriteLine($"Generasi : {counterGenerasi}");
+            Console.WriteLine($"\tLocal Best : {gbDecoded}. f={FungsiObjektif(gbDecoded):F8}");
+            Console.WriteLine($"\tKonvergensi Populasi : {konvergensiPopulasi:P2}");
+        }
 
         while (counterGenerasi < JumlahGenerasi && !IsPopulasiKonvergen(populasi))
         {
-            //Perhitungan Fitness dan Penentuan Local dan Global Best
-            var fitnessPopulasi = HitungFitnessPopulasi(populasi);
-
-            var localBestFitness = JenisAgen == JenisAgen.Max ? fitnessPopulasi.Max() : fitnessPopulasi.Min();
-            var localBestIndex = fitnessPopulasi.IndexOf(localBestFitness);
-            var localBest = new Kromoson<TAlel>(populasi[localBestIndex]);
-
-            localBests.Add(localBest);
-            if (globalBest is null)
-            {
-                globalBest = localBest;
-                globalBestFitness = localBestFitness;
-                generasiGlobalBest = counterGenerasi;
-            }
-            else
-            {
-                Func<double, double, bool> compare = JenisAgen == JenisAgen.Max ? (double gb, double lb) => gb < lb : (double gb, double lb) => gb > lb;
-                if (compare(globalBestFitness, localBestFitness))
-                {
-                    globalBest = localBest;
-                    globalBestFitness = localBestFitness;
-                    generasiGlobalBest = counterGenerasi;
-                }
-            }
-
-            if (verbose)
-            {
-                var lbDecoded = Encoding.Decode(localBest);
-                var konvergensiPopulasi = HitungKonvergensiPopulasi(populasi);
-
-                Console.WriteLine($"Generasi : {counterGenerasi + 1}");
-                Console.WriteLine($"\tLocal Best : {lbDecoded}. f={FungsiObjektif(lbDecoded)}");
-                Console.WriteLine($"\tKonvergensi Populasi : {konvergensiPopulasi:P2}");
-            }
 
             //Seleksi
             populasi = Seleksi.Seleksi(populasi, Encoding, FungsiObjektif, JenisAgen);
@@ -125,15 +81,38 @@ public class Agen<TAlel, TAsli>
             //Mutasi
             populasi = Mutasi(populasi);
 
-            populasiPerGenerasi.Add(populasi.Select(k => new Kromoson<TAlel>(k)).ToList());
-
             counterGenerasi++;
+
+            //Perhitungan Fitness dan Penentuan Local dan Global Best
+            fitnessPopulasi = HitungFitnessPopulasi(populasi);
+
+            var localBestFitness = JenisAgen == JenisAgen.Max ? fitnessPopulasi.Max() : fitnessPopulasi.Min();
+            var localBestIndex = fitnessPopulasi.IndexOf(localBestFitness);
+            var localBest = new Kromoson<TAlel>(populasi[localBestIndex]);
+
+            localBests.Add(localBest);
+            if (compare(globalBestFitness, localBestFitness))
+            {
+                globalBest = localBest;
+                globalBestFitness = localBestFitness;
+                generasiGlobalBest = counterGenerasi;
+            }
+
+            if (verbose)
+            {
+                var lbDecoded = Encoding.Decode(localBest);
+                var konvergensiPopulasi = HitungKonvergensiPopulasi(populasi);
+
+                Console.WriteLine($"Generasi : {counterGenerasi}");
+                Console.WriteLine($"\tLocal Best : {lbDecoded}. f={FungsiObjektif(lbDecoded):F8}");
+                Console.WriteLine($"\tKonvergensi Populasi : {konvergensiPopulasi:P2}");
+            }
+
         }
 
         var hasil = new AgenResult<TAlel>(
-            globalBest!,
+            globalBest,
             localBests,
-            populasiPerGenerasi,
             HitungKonvergensiPopulasi(populasi),
             counterGenerasi,
             generasiGlobalBest);
