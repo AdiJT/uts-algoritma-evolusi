@@ -7,8 +7,6 @@ using UTSAlgoEvolusi.Core.Seleksi;
 
 internal class Program
 {
-    private record TestResult(double FitnessGlobalBest, int GenerasiGlobalBest, double Runtime);
-
     private static void Main(string[] args)
     {
         var fungsiObjektif = (LinearDuaPeubah args) => 100 * (args.X * args.X - args.Y) * (args.X * args.X - args.Y) + (1 - args.X) * (1 - args.X);
@@ -27,44 +25,21 @@ internal class Program
         Console.WriteLine("3. Adi Juanito Taklal");
         Console.WriteLine("4. Albert Berliano Tapatab");
 
-        ICrossover<int> crossover = new SinglePointCrossover<int>();
-        ISeleksi<int, LinearDuaPeubah> seleksi = new RouletteWheel<int, LinearDuaPeubah>();
+        Console.WriteLine();
+        var crossover = ChoicePrompt<ICrossover<int>>(
+            "Pilih Metode Kawin Silang",
+            [("Single Point Crossover", new SinglePointCrossover<int>()), ("Two Point Crossover", new TwoPointCrossover<int>())],
+            new TwoPointCrossover<int>(), "Two Point Crossover");
 
-        Console.WriteLine("\n1. Roullette Wheel");
-        Console.WriteLine("2. Tournament Selection");
-        Console.Write("Pilih metode seleksi : ");
-        var pilih = Console.ReadLine();
-
-        if (!string.IsNullOrEmpty(pilih))
-            seleksi = pilih switch
-            {
-                "1" => new RouletteWheel<int, LinearDuaPeubah>(),
-                "2" => new TournamentSelection<int, LinearDuaPeubah>(),
-                _ => new TournamentSelection<int, LinearDuaPeubah>(),
-            };
-        else
-            Console.WriteLine("Pilihan Salah! Metode seleksi [1] digunakan!");
-
-        Console.WriteLine("\n1. Single Point Crossover (SPX)");
-        Console.WriteLine("2. Two Point Crossover (TPX)");
-        Console.Write("Pilih metode kawin silang : ");
-        pilih = Console.ReadLine();
-
-        if (!string.IsNullOrEmpty(pilih))
-            crossover = pilih switch
-            {
-                "1" => new SinglePointCrossover<int>(),
-                "2" => new TwoPointCrossover<int>(),
-                _ => new SinglePointCrossover<int>(),
-            };
-        else
-            Console.WriteLine("Pilihan Salah! Metode kawin silang [1] digunakan!");
-
-
+        Console.WriteLine();
+        var seleksi = ChoicePrompt<ISeleksi<int, LinearDuaPeubah>>(
+            "Pilih Metode Seleksi",
+            [("Roullette Wheel", new RouletteWheel<int, LinearDuaPeubah>()), ("Tournament Selection", new TournamentSelection<int, LinearDuaPeubah>())],
+            new TournamentSelection<int, LinearDuaPeubah>(), "Tournament Selection");
 
         var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, seleksi, encoding, crossover)
         {
-            JenisAgen = JenisAgen.Min,
+            JenisAgen = JenisAgen.Max,
             JumlahGenerasi = 100,
             JumlahPopulasi = 300,
             BatasKonvergensiPopulasi = 0.8,
@@ -90,58 +65,37 @@ internal class Program
         var jumlahTes = 50;
         Console.WriteLine($"\nTes Roulette Vs Tournament Selection. Jumlah Tes : {jumlahTes}");
 
-        var daftarHasilTesRoulette = new List<TestResult>();
-        var daftarHasilTesTournament = new List<TestResult>();
-        var stopwatch = new Stopwatch();
+        var daftarHasilTesRoulette = new List<AgenResult<int>>();
+        var daftarHasilTesTournament = new List<AgenResult<int>>();
 
         agen.Seleksi = new RouletteWheel<int, LinearDuaPeubah>();
         for (int i = 0; i < jumlahTes; i++)
         {
-            stopwatch.Start();
             var r = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
-            stopwatch.Stop();
-
-            var gb = encoding.Decode(r.GlobalBest);
-            daftarHasilTesRoulette.Add(
-                new TestResult(
-                    fungsiObjektif(gb),
-                    r.GenerasiGlobalBest,
-                    stopwatch.Elapsed.TotalMilliseconds));
-            stopwatch.Restart();
-
+            daftarHasilTesRoulette.Add(r);
             Console.Write("|");
         }
 
         agen.Seleksi = new TournamentSelection<int, LinearDuaPeubah>();
         for (int i = 0; i < jumlahTes; i++)
         {
-            stopwatch.Start();
             var r = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
-            stopwatch.Stop();
-
-            var gb = encoding.Decode(r.GlobalBest);
-            daftarHasilTesTournament.Add(
-                new TestResult(
-                    fungsiObjektif(gb),
-                    r.GenerasiGlobalBest,
-                    stopwatch.Elapsed.TotalSeconds));
-            stopwatch.Restart();
-
+            daftarHasilTesTournament.Add(r);
             Console.Write("|");
         }
 
         var rata2Roulette = new
         {
-            Fitness = daftarHasilTesRoulette.Average(r => r.FitnessGlobalBest),
+            Fitness = daftarHasilTesRoulette.Select(r => agen.FungsiObjektif(agen.Encoding.Decode(r.GlobalBest))).Average(),
             GenerasiGlobalBest = daftarHasilTesRoulette.Average(r => r.GenerasiGlobalBest),
-            RunningTime = daftarHasilTesRoulette.Average(r => r.Runtime)
+            RunningTime = daftarHasilTesRoulette.Average(r => r.RunningTime)
         };
 
         var rata2Tournament = new
         {
-            Fitness = daftarHasilTesTournament.Average(r => r.FitnessGlobalBest),
+            Fitness = daftarHasilTesTournament.Select(r => agen.FungsiObjektif(agen.Encoding.Decode(r.GlobalBest))).Average(),
             GenerasiGlobalBest = daftarHasilTesTournament.Average(r => r.GenerasiGlobalBest),
-            RunningTime = daftarHasilTesTournament.Average(r => r.Runtime)
+            RunningTime = daftarHasilTesTournament.Average(r => r.RunningTime)
         };
 
         Console.WriteLine($"\nHasil Roullette Vs Tournament Selection");
@@ -154,5 +108,19 @@ internal class Program
         Console.WriteLine($"\tRata-Rata Fitness Global Best : {rata2Tournament.Fitness:F8}");
         Console.WriteLine($"\tRata-Rata Generasi Global Best : {rata2Tournament.GenerasiGlobalBest}");
         Console.WriteLine($"\tRata-Rata Running Time: {rata2Tournament.RunningTime} ms");
+    }
+
+    private static T ChoicePrompt<T>(string prompt, List<(string label, T item)> choices, T defaultChoice, string defaultChoiceLabel)
+    {
+        for(int i = 0; i < choices.Count; i++)
+            Console.WriteLine($"{i + 1}. {choices[i].label}");
+        Console.Write($"{prompt}. [Default={defaultChoiceLabel}] : ");
+        var pilih = Console.ReadLine();
+
+        if (!string.IsNullOrEmpty(pilih) && int.TryParse(pilih, out var choice) && choice >= 1 && choice <= choices.Count)
+            return choices[choice].item;
+
+        Console.WriteLine("Pilihan salah. Default digunakan!");
+        return defaultChoice;    
     }
 }

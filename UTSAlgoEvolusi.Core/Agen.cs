@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UTSAlgoEvolusi.Core.Abstractions;
 using UTSAlgoEvolusi.Core.Utils;
@@ -43,6 +44,9 @@ public class Agen<TAlel, TAsli>
     {
         if (populasiAwal.Count != JumlahPopulasi)
             throw new ArgumentException("jumlah populasiAwal tidak sama dengan JumlahPopulasi");
+
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
 
         var populasi = populasiAwal.Select(k => new Kromoson<TAlel>(k)).ToList();
 
@@ -110,12 +114,16 @@ public class Agen<TAlel, TAsli>
 
         }
 
+        stopwatch.Stop();
+        var runningTime = stopwatch.Elapsed.TotalMilliseconds;
+
         var hasil = new AgenResult<TAlel>(
             globalBest,
             localBests,
             HitungKonvergensiPopulasi(populasi),
             counterGenerasi,
-            generasiGlobalBest);
+            generasiGlobalBest,
+            runningTime);
 
         return hasil;
     }

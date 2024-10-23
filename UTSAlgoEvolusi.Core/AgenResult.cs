@@ -7,4 +7,5 @@ public record AgenResult<TAlel>(
     List<Kromoson<TAlel>> LocalBests, 
     double KonvergensiPopulasi, 
     int CounterGenerasi, 
-    int GenerasiGlobalBest);
+    int GenerasiGlobalBest,
+    double RunningTime);
