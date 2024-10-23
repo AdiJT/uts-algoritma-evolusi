@@ -13,7 +13,7 @@ public class TwoPointCrossover<TAlel> : ICrossover<TAlel>
             throw new Exception("Panjang gen parent1 dan parent2 berbeda");
 
         var random = new Random();
-        var awalCrossover = random.Next(0, panjangGen - 1);
+        var awalCrossover = random.Next(0, panjangGen);
         var akhirCrossover = random.Next(awalCrossover, panjangGen);
 
         var anak1 = new Kromoson<TAlel>(panjangGen);

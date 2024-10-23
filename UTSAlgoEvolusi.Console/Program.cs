@@ -21,7 +21,7 @@ var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, roulleteWheel, encodin
     JumlahGenerasi = 100,
     JumlahPopulasi = 300,
     BatasKonvergensiPopulasi = 0.8,
-    ProbabilitasMutasi = 0.1,
+    ProbabilitasMutasi = 0.02,
     ProbabilitasCrossover = 0.7
 };
 
@@ -34,7 +34,7 @@ Console.WriteLine($"Probabilitas Crossover : {agen.ProbabilitasCrossover:P2}");
 Console.WriteLine($"Probabilitas Mutasi : {agen.ProbabilitasMutasi:P2}");
 Console.WriteLine($"Batas Konvergensi : {agen.BatasKonvergensiPopulasi:P2}");
 
-var result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi), true);
+var result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi), verbose: true);
 
 var globalBest = encoding.Decode(result.GlobalBest);
 Console.WriteLine($"Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
