@@ -39,7 +39,7 @@ internal class Program
 
         var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, seleksi, encoding, crossover)
         {
-            JenisAgen = JenisAgen.Max,
+            JenisAgen = JenisAgen.Min,
             JumlahGenerasi = 100,
             JumlahPopulasi = 300,
             BatasKonvergensiPopulasi = 0.8,
