@@ -118,7 +118,7 @@ internal class Program
         var pilih = Console.ReadLine();
 
         if (!string.IsNullOrEmpty(pilih) && int.TryParse(pilih, out var choice) && choice >= 1 && choice <= choices.Count)
-            return choices[choice].item;
+            return choices[choice - 1].item;
 
         Console.WriteLine("Pilihan salah. Default digunakan!");
         return defaultChoice;    
