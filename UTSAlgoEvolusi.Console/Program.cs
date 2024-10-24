@@ -61,12 +61,13 @@ internal class Program
         Console.WriteLine($"Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
         Console.WriteLine($"Generasi Global Best : {result.GenerasiGlobalBest + 1}");
 
-        var jumlahTes = 50;
+        var jumlahTes = 100;
         Console.WriteLine($"\nTes Roulette Vs Tournament Selection. Jumlah Tes : {jumlahTes}");
 
         var daftarTaskTesRoulette = Enumerable.Range(0, jumlahTes)
             .Select(i => Task.Run(() =>
             {
+                Console.Write($" {i} ");
                 var a = new Agen<int, LinearDuaPeubah>(agen)
                 {
                     Seleksi = new RouletteWheel<int, LinearDuaPeubah>()
@@ -78,6 +79,7 @@ internal class Program
         var daftarTaskTesTournament = Enumerable.Range(0, jumlahTes)
             .Select(i => Task.Run(() =>
             {
+                Console.Write($" {i} ");
                 var a = new Agen<int, LinearDuaPeubah>(agen)
                 {
                     Seleksi = new TournamentSelection<int, LinearDuaPeubah>()
