@@ -40,6 +40,21 @@ public class Agen<TAlel, TAsli>
         Encoding = encoding;
     }
 
+    public Agen(Agen<TAlel, TAsli> agen)
+    {
+        JenisAgen = agen.JenisAgen;
+        JumlahGenerasi = agen.JumlahGenerasi;
+        JumlahPopulasi = agen.JumlahPopulasi;
+        ProbabilitasCrossover = agen.ProbabilitasCrossover;
+        ProbabilitasMutasi = agen.ProbabilitasMutasi;
+        BatasKonvergensiPopulasi = agen.BatasKonvergensiPopulasi;
+        BatasSelisihFitness = agen.BatasSelisihFitness;
+        FungsiObjektif = agen.FungsiObjektif;
+        Seleksi = agen.Seleksi;
+        Crossover = agen.Crossover;
+        Encoding = agen.Encoding;
+    }
+
     public AgenResult<TAlel> Execute(List<Kromoson<TAlel>> populasiAwal, bool verbose = false)
     {
         if (populasiAwal.Count != JumlahPopulasi)

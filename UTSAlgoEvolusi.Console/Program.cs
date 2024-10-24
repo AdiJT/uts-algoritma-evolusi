@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using UTSAlgoEvolusi.Core;
+﻿using UTSAlgoEvolusi.Core;
 using UTSAlgoEvolusi.Core.Abstractions;
 using UTSAlgoEvolusi.Core.Crossover;
 using UTSAlgoEvolusi.Core.Encoding;
@@ -65,24 +64,30 @@ internal class Program
         var jumlahTes = 50;
         Console.WriteLine($"\nTes Roulette Vs Tournament Selection. Jumlah Tes : {jumlahTes}");
 
-        var daftarHasilTesRoulette = new List<AgenResult<int>>();
-        var daftarHasilTesTournament = new List<AgenResult<int>>();
+        var daftarTaskTesRoulette = Enumerable.Range(0, jumlahTes)
+            .Select(i => Task.Run(() =>
+            {
+                var a = new Agen<int, LinearDuaPeubah>(agen)
+                {
+                    Seleksi = new RouletteWheel<int, LinearDuaPeubah>()
+                };
 
-        agen.Seleksi = new RouletteWheel<int, LinearDuaPeubah>();
-        for (int i = 0; i < jumlahTes; i++)
-        {
-            var r = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
-            daftarHasilTesRoulette.Add(r);
-            Console.Write("|");
-        }
+                return a.Execute(a.Encoding.GeneratePopulasi(a.JumlahPopulasi));
+            })).ToArray();
 
-        agen.Seleksi = new TournamentSelection<int, LinearDuaPeubah>();
-        for (int i = 0; i < jumlahTes; i++)
-        {
-            var r = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi));
-            daftarHasilTesTournament.Add(r);
-            Console.Write("|");
-        }
+        var daftarTaskTesTournament = Enumerable.Range(0, jumlahTes)
+            .Select(i => Task.Run(() =>
+            {
+                var a = new Agen<int, LinearDuaPeubah>(agen)
+                {
+                    Seleksi = new TournamentSelection<int, LinearDuaPeubah>()
+                };
+
+                return a.Execute(a.Encoding.GeneratePopulasi(a.JumlahPopulasi));
+            })).ToArray();
+
+        var daftarHasilTesRoulette = Task.WhenAll(daftarTaskTesRoulette).Result;
+        var daftarHasilTesTournament = Task.WhenAll(daftarTaskTesTournament).Result;
 
         var rata2Roulette = new
         {
