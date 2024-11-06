@@ -126,7 +126,6 @@ public class Agen<TAlel, TAsli>
                 Console.WriteLine($"\tLocal Best : {lbDecoded}. f={FungsiObjektif(lbDecoded):F8}");
                 Console.WriteLine($"\tKonvergensi Populasi : {konvergensiPopulasi:P2}");
             }
-
         }
 
         stopwatch.Stop();
