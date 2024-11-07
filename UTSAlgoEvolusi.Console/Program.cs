@@ -8,7 +8,8 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        var fungsiObjektif = (LinearDuaPeubah args) => 100 * (args.X * args.X - args.Y) * (args.X * args.X - args.Y) + (1 - args.X) * (1 - args.X);
+        var fungsiObjektif = (LinearDuaPeubah args) => 
+            100 * (args.X * args.X - args.Y) * (args.X * args.X - args.Y) + (1 - args.X) * (1 - args.X);
 
         var encoding = new FungsiLinearDuaPeubahEncoding
         {
