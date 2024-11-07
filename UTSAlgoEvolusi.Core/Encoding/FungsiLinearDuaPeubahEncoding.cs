@@ -75,7 +75,7 @@ public class FungsiLinearDuaPeubahEncoding : IEncoding<int, LinearDuaPeubah>
         var xBiner = BinaryConverter.ToBinary(xDecimal, PanjangGenX);
         var yBiner = BinaryConverter.ToBinary(yDecimal, PanjangGenY);
 
-        return new Kromoson<int>(xBiner.Concat(yBiner).ToList());
+        return new Kromoson<int>([.. xBiner, .. yBiner]);
     }
 
     public LinearDuaPeubah Decode(Kromoson<int> kromoson)
