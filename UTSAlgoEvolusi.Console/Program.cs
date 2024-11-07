@@ -27,13 +27,19 @@ internal class Program
         Console.WriteLine();
         var crossover = ChoicePrompt<ICrossover<int>>(
             "Pilih Metode Kawin Silang",
-            [("Single Point Crossover", new SinglePointCrossover<int>()), ("Two Point Crossover", new TwoPointCrossover<int>())],
+            [
+                ("Single Point Crossover", new SinglePointCrossover<int>()), 
+                ("Two Point Crossover", new TwoPointCrossover<int>())
+            ],
             new TwoPointCrossover<int>(), "Two Point Crossover");
 
         Console.WriteLine();
         var seleksi = ChoicePrompt<ISeleksi<int, LinearDuaPeubah>>(
             "Pilih Metode Seleksi",
-            [("Roullette Wheel", new RouletteWheel<int, LinearDuaPeubah>()), ("Tournament Selection", new TournamentSelection<int, LinearDuaPeubah>())],
+            [
+                ("Roullette Wheel", new RouletteWheel<int, LinearDuaPeubah>()), 
+                ("Tournament Selection", new TournamentSelection<int, LinearDuaPeubah>())
+            ],
             new TournamentSelection<int, LinearDuaPeubah>(), "Tournament Selection");
 
         var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, seleksi, encoding, crossover)
