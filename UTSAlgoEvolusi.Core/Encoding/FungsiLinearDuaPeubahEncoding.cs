@@ -67,7 +67,7 @@ public class FungsiLinearDuaPeubahEncoding : IEncoding<int, LinearDuaPeubah>
         asli.Y = Math.Clamp(asli.Y, BatasY.bawah, BatasY.atas);
 
         var rasioX = (Math.Pow(2, PanjangGenX) - 1) / (BatasX.atas - BatasX.bawah);
-        var xDecimal = (int)((asli.X - _batasX.bawah) * rasioX);
+        var xDecimal = (int)((asli.X - BatasX.bawah) * rasioX);
 
         var rasioY = (Math.Pow(2, PanjangGenY) - 1) / (BatasY.atas - BatasY.bawah);
         var yDecimal = (int)((asli.Y - BatasY.bawah) * rasioY);
