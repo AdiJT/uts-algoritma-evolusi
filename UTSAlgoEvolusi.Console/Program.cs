@@ -46,7 +46,7 @@ internal class Program
         var agen = new Agen<int, LinearDuaPeubah>(fungsiObjektif, seleksi, encoding, crossover)
         {
             JenisAgen = JenisAgen.Min,
-            JumlahGenerasi = 100,
+            JumlahGenerasi = 200,
             JumlahPopulasi = 300,
             BatasKonvergensiPopulasi = 0.8,
             ProbabilitasMutasi = 0.02,
@@ -63,7 +63,8 @@ internal class Program
         Console.WriteLine($"Batas Konvergensi : {agen.BatasKonvergensiPopulasi:P2}");
         Console.WriteLine($"Jumlah bit encoding x + y : {encoding.PanjangGen}");
 
-        var result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi), verbose: true);
+        var populasiAwal = encoding.GeneratePopulasi(agen.JumlahPopulasi);
+        var result = agen.Execute(populasiAwal, verbose: true);
 
         var globalBest = encoding.Decode(result.GlobalBest);
         Console.WriteLine($"Global Best : (x : {globalBest.X:F8}, y : {globalBest.Y:F8}), f(x, y) = {fungsiObjektif(globalBest):F8}");
@@ -81,7 +82,7 @@ internal class Program
                     Seleksi = new RouletteWheel<int, LinearDuaPeubah>()
                 };
 
-                return a.Execute(a.Encoding.GeneratePopulasi(a.JumlahPopulasi));
+                return a.Execute(populasiAwal);
             })).ToArray();
 
         var daftarTaskTesTournament = Enumerable.Range(0, jumlahTes)
@@ -93,7 +94,7 @@ internal class Program
                     Seleksi = new TournamentSelection<int, LinearDuaPeubah>()
                 };
 
-                return a.Execute(a.Encoding.GeneratePopulasi(a.JumlahPopulasi));
+                return a.Execute(populasiAwal);
             })).ToArray();
 
         var daftarHasilTesRoulette = Task.WhenAll(daftarTaskTesRoulette).Result;
