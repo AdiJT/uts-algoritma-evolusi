@@ -61,7 +61,7 @@ internal class Program
         Console.WriteLine($"Probabilitas Crossover : {agen.ProbabilitasCrossover:P2}");
         Console.WriteLine($"Probabilitas Mutasi : {agen.ProbabilitasMutasi:P2}");
         Console.WriteLine($"Batas Konvergensi : {agen.BatasKonvergensiPopulasi:P2}");
-        Console.WriteLine($"Jumlah bit encoding : {encoding.PanjangGen}");
+        Console.WriteLine($"Jumlah bit encoding x + y : {encoding.PanjangGen}");
 
         var result = agen.Execute(encoding.GeneratePopulasi(agen.JumlahPopulasi), verbose: true);
 
